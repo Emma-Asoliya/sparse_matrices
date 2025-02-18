@@ -32,7 +32,7 @@ class SparseMatrix:
         else:
             self.matrix[(row, col)] = value
 
-    def __add__(self, other);
+    def __add__(self, other):
         if self.num_rows != other.num_rows or self.num-cols != other.num_cols:
             raise ValueError('Matrices must have the same dimensions to be added')
         
@@ -46,13 +46,13 @@ class SparseMatrix:
     
     def __mul__(self, other):
         if self.num_cols != other.num_rows:
-            raise ValueError(Wrong matrix dimensions for multiplication')
+            raise ValueError('Wrong matrix dimensions for multiplication')
     
         result = SparseMatrix.create_empty(self.num_rows, other.num_cols)
 
         for (row, col), value in self.matrix.items():
-        for k in range(other.num_cols):
-            result.matrix[(row, k)] += value * other.get_element(col, k)
+            for k in range(other.num_cols):
+                result.matrix[(row, k)] += value * other.get_element(col, k)
 
         return result
 
@@ -64,3 +64,38 @@ class SparseMatrix:
         obj.num_rows = rows
         obj.num_cols = cols
         return obj
+    
+    def save_to_file(self, file_path):
+        with open(file_path, 'w') as file:
+            file.write(f"rows="{self.num_rows}\n")
+            file.write(f"cols="{self.num_cols}\n")
+            for (row, col), value in sorted(self.matrix.items()):
+                file.write(f"({row}, {col}, {value})\n")
+
+
+    def main():
+    file1 = 'easy_sample_02_1.txt'
+    file2 = 'easy_sample_03_1.txt'
+
+    matrix1 = SparseMatrix(file1)
+    matrix2 = SparseMatrix(file2)
+
+    operation = input("Select an option: 1. Add, 2. Subtract, 3. Multiply: ").strip().lower()
+    output_file ="result_matrix.txt"
+
+    if operartion == 'add':
+        result = matrix1 + matrix2
+    elif operation == 'subtract':
+        result = matrix1 - matrix2
+    elif operation == 'multiply':
+        result = matrix1 * matrix2
+
+    else:
+        print('Invalid operation')
+        return
+
+        result.save_to_file(output_file)
+        print(f'Result saved to {output_file}')
+
+if __name__ == "__main__":
+    main()
