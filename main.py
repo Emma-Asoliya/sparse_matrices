@@ -2,21 +2,22 @@ import re
 from collections import defaultdict
 
 class SparseMatrix:
-    def __init__(self, file_path):
+    def __init__(self, file_path=None, num_rows=0, num_cols=0):
         self.matrix = defaultdict(int)
-        self.num_rows = 0
-        self.num_cols = 0
-        self.load_from_file(file_path)
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        if file_path:
+            self.load_from_file(file_path)
 
     def load_from_file(self, file_path):
         try:
             with open(file_path, 'r') as file:
                 lines = file.readlines()
-                slef.num_rows = int(re.search(r'\d+', lines[0]).group())
+                self.num_rows = int(re.search(r'\d+', lines[0]).group())
                 self.num_cols = int(re.search(r'\d+', lines[1]).group())
 
                 for line in lines[2:]:
-                    match = re.match(r'\((d+, \s*(\d+), \s*(-?\d+)\)', line)
+                    match = re.match(r'\((\d+),\s*(\d+),\s*(-?\d+)\)', line)  
                     if match:
                         row, col, value = map(int, match.groups())
                         self.matrix[(row, col)] = value
@@ -33,14 +34,30 @@ class SparseMatrix:
             self.matrix[(row, col)] = value
 
     def __add__(self, other):
-        if self.num_rows != other.num_rows or self.num-cols != other.num_cols:
-            raise ValueError('Matrices must have the same dimensions to be added')
-        
-        result = SparseMatrix.create_empty(self.num_rows, self.num_cols)
-        result.matrix = self.matrix.copy()
+        max_rows = max(self.num_rows, other.num_rows)
+        max_cols = max(self.num_cols, other.num_cols)
+
+        result = SparseMatrix(num_rows=max_rows, num_cols=max_cols)
+
+        for (row, col), value in self.matrix.items():
+            result.matrix[(row, col)] += value
 
         for (row, col), value in other.matrix.items():
             result.matrix[(row, col)] += value
+
+        return result
+
+    def __sub__(self, other):
+        max_rows = max(self.num_rows, other.num_rows)
+        max_cols = max(self.num_cols, other.num_cols)
+        
+        result = SparseMatrix(num_rows=max_rows, num_cols=max_cols)
+
+        for (row, col), value in self.matrix.items():
+            result.matrix[(row, col)] += value
+
+        for (row, col), value in other.matrix.items():
+            result.matrix[(row, col)] -= value
 
         return result
     
@@ -48,54 +65,52 @@ class SparseMatrix:
         if self.num_cols != other.num_rows:
             raise ValueError('Wrong matrix dimensions for multiplication')
     
-        result = SparseMatrix.create_empty(self.num_rows, other.num_cols)
+        result = SparseMatrix(self.num_rows, other.num_cols)
 
         for (row, col), value in self.matrix.items():
             for k in range(other.num_cols):
                 result.matrix[(row, k)] += value * other.get_element(col, k)
 
         return result
-
-
-    @staticmethod
-    def create_empty(rows, cols):
-        obj = SparseMatrix.__new__(SparseMatrix)
-        obj.matrix = defaultdict(int)
-        obj.num_rows = rows
-        obj.num_cols = cols
-        return obj
     
     def save_to_file(self, file_path):
         with open(file_path, 'w') as file:
-            file.write(f"rows="{self.num_rows}\n")
-            file.write(f"cols="{self.num_cols}\n")
+            file.write(f"rows={self.num_rows}\n")
+            file.write(f"cols={self.num_cols}\n")
             for (row, col), value in sorted(self.matrix.items()):
                 file.write(f"({row}, {col}, {value})\n")
 
 
-    def main():
+def main():
     file1 = 'easy_sample_02_1.txt'
     file2 = 'easy_sample_03_1.txt'
 
     matrix1 = SparseMatrix(file1)
     matrix2 = SparseMatrix(file2)
 
+    print(f'Matrix 1: {matrix1.num_rows}x{matrix1.num_cols}')
+    print(f'Matrix 2: {matrix2.num_rows}x{matrix2.num_cols}')
+
     operation = input("Select an option: 1. Add, 2. Subtract, 3. Multiply: ").strip().lower()
-    output_file ="result_matrix.txt"
+    output_file = "result_matrix.txt"
 
-    if operartion == 'add':
+    if operation == '1' or operation == 'add':
         result = matrix1 + matrix2
-    elif operation == 'subtract':
+    elif operation == '2' or operation == 'subtract':
         result = matrix1 - matrix2
-    elif operation == 'multiply':
-        result = matrix1 * matrix2
-
+    elif operation == '3' or operation == 'multiply':
+        try:
+            result = matrix1 * matrix2
+        except ValueError as e:
+            print(f"Error: {e}")
+            return
     else:
         print('Invalid operation')
         return
 
-        result.save_to_file(output_file)
-        print(f'Result saved to {output_file}')
+    result.save_to_file(output_file)
+    print(f'Result saved to {output_file}')
+
 
 if __name__ == "__main__":
     main()
