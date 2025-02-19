@@ -69,7 +69,8 @@ class SparseMatrix:
 
         for (row, col), value in self.matrix.items():
             for k in range(other.num_cols):
-                result.matrix[(row, k)] += value * other.get_element(col, k)
+                if (col, k) not in other.matrix:
+                    result.matrix[(row, k)] += value * other.get_element(col, k)
 
         return result
     
