@@ -44,18 +44,3 @@ cols=5
 (0, 1, 10)
 (2, 3, -5)
 (4, 0, 20)
-
-Error Handling
-
-If the matrices have incompatible dimensions for multiplication, an error is raised.
-
-If the input file format is incorrect, the program exits with an error message.
-
-Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-License
-
-This project is licensed under the MIT License.
-
